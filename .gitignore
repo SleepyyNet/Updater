@@ -1,0 +1,14 @@
+*.exe
+*.log
+*.tlog
+*.obj
+*.iobj
+*.ipdb
+*.ilk
+*.idb
+*.pdb
+*.ipch
+settings.db
+settings.ini
+Browse.VC.*
+.suo

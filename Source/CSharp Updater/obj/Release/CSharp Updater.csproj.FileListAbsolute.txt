@@ -1,0 +1,18 @@
+C:\Users\USER\Desktop\CSharp Updater_Task\CSharp Updater\bin\Release\CSharp Updater.exe.config
+C:\Users\USER\Desktop\CSharp Updater_Task\CSharp Updater\bin\Release\CSharp Updater.exe
+C:\Users\USER\Desktop\CSharp Updater_Task\CSharp Updater\bin\Release\CSharp Updater.pdb
+C:\Users\USER\Desktop\CSharp Updater_Task\CSharp Updater\obj\Release\CSharp_Updater.Download.resources
+C:\Users\USER\Desktop\CSharp Updater_Task\CSharp Updater\obj\Release\CSharp_Updater.Properties.Resources.resources
+C:\Users\USER\Desktop\CSharp Updater_Task\CSharp Updater\obj\Release\CSharp Updater.csproj.GenerateResource.Cache
+C:\Users\USER\Desktop\CSharp Updater_Task\CSharp Updater\obj\Release\CSharp Updater.csproj.CoreCompileInputs.cache
+C:\Users\USER\Desktop\CSharp Updater_Task\CSharp Updater\obj\Release\CSharp Updater.exe
+C:\Users\USER\Desktop\CSharp Updater_Task\CSharp Updater\obj\Release\CSharp Updater.pdb
+C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\bin\Release\CSharp Updater.exe.config
+C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\bin\Release\CSharp Updater.exe
+C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\bin\Release\CSharp Updater.pdb
+C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\obj\Release\CSharp_Updater.Download.resources
+C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\obj\Release\CSharp_Updater.Properties.Resources.resources
+C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\obj\Release\CSharp Updater.csproj.GenerateResource.Cache
+C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\obj\Release\CSharp Updater.csproj.CoreCompileInputs.cache
+C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\obj\Release\CSharp Updater.exe
+C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\obj\Release\CSharp Updater.pdb
