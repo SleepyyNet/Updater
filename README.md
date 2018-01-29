@@ -6,10 +6,7 @@ Small Downloader/ Updater. Start with download information parameters and start 
 2. Version // Style "X.X.X.X" == "Major.Minor.Build.Revision"
 3. DownloadLinkUpdate
 4. DownloadLinkUpdateXML
-5. XMLTagNames
-  - XMLTagNames have to be seperated by "|"
-    - First TagName = Version (String)
-    - Second TagName = DownloadLink (String)
+5. XMLTagNames (XMLTagNames have to be seperated by "|"; First TagName = Version (String); Second TagName = DownloadLink (String))
 6. Description
 7. DownloadFolder
 
