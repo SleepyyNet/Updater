@@ -411,30 +411,31 @@ namespace CSharp_Updater
                                 DateTime now = DateTime.Now;
                                 TimeSpan interval = now - lastUpdateTime;
                                 double timeDiff = interval.TotalSeconds;
-                                double sizeDiff = downloadedSize - lastDownloadedSize;
-                                if(sizeDiff < 0)
-                                {
-                                    sizeDiff = 0;
-                                }
-                                string speedString = " kb/s";
-                                double speed = (double)Math.Floor((double)(sizeDiff) / timeDiff);
-                                if(speed < 0)
+                                double sizeDiff = downloadedSize - lastDownloadedSize; // byte
+                                double speed = (double)Math.Floor((double)(sizeDiff * 8) / timeDiff); // bit
+                                // bit / second
+                                if (speed < 0)
                                 {
                                     speed = 0;
                                 }
-                                if (speed > 0) // Kilobytes
+                                string speedString = " Bit/s";
+                                // kilobit / second
+                                if (speed > 999)
                                 {
-                                    speed /= 1000;
+                                    speed /= 1000; // kilobit
+                                    speedString = " kBit/s";
 
-                                    if (speed > 999) // Megabytes
+                                    // megabit / second
+                                    if (speed > 999)
                                     {
-                                        speed /= 1000;
-                                        speedString = " mb/s";
+                                        speed /= 1000; // megabit
+                                        speedString = " MBit/s";
 
-                                        if (speed > 999) // Gigabytes
+                                        // gigabit / second
+                                        if (speed > 999) // gigabit
                                         {
                                             speed /= 1000;
-                                            speedString = " gb/s";
+                                            speedString = " GBit/s";
                                         }
                                     }
                                 }
@@ -456,7 +457,8 @@ namespace CSharp_Updater
                 }
 
                 // thread safe control modifying
-                //tmpReturn = (bool)this.Invoke((Func<string, bool>)DoChangeStatus, "Download beendet");
+                this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Download beendet");
+                this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Speed, "");
             }
             catch (System.IO.IOException ex)
             {
