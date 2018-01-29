@@ -57,7 +57,7 @@ namespace CSharp_Updater
         }
 
         public DownloadInformation downloadInformation = new DownloadInformation { };
-        
+
         public async void DoUpdate(object data)
         {
             this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Version, Application.ProductVersion);
@@ -167,7 +167,7 @@ namespace CSharp_Updater
                     }
                     catch (System.FormatException ex)
                     {
-                        if(ex.InnerException != null)
+                        if (ex.InnerException != null)
                         {
                             util.log(ex.InnerException.ToString(), logPath);
                         }
@@ -190,7 +190,7 @@ namespace CSharp_Updater
                     return false;
                 }
                 //   5. DownloadLinkUpdateXMLSchema
-                if(downloadInformation.XMLTagNames.Length >= 1)
+                if (downloadInformation.XMLTagNames.Length >= 1)
                 {
                     if (downloadInformation.XMLTagNames[0] == "")
                     {
@@ -222,7 +222,7 @@ namespace CSharp_Updater
 
         public bool IsNewVersionHigher()
         {
-            if(oldVersion.CompareTo(newVersion) < 0)
+            if (oldVersion.CompareTo(newVersion) < 0)
             {
                 // negative means newVersion is higher
                 return true;
@@ -270,7 +270,7 @@ namespace CSharp_Updater
                     {
                         util.log(ex.ToString(), logPath);
                     }
-                    
+
                     return false;
                 }
             }
@@ -281,14 +281,13 @@ namespace CSharp_Updater
 
             return true;
         }
-        
+
         public bool DoDownload(string applicationName, string downloadLink, string description, string downloadFolder)
         {
             // thread safe control modifying
             this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Content, description);
-
-            // thread safe control modifying
             this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Datei anfordern");
+            this.Invoke((Func<int, bool>)DoChangeProgress, 0);
 
             // check file size
             System.Net.HttpWebResponse response = null;
@@ -321,7 +320,7 @@ namespace CSharp_Updater
 
             // complete size of the content that has to be downloaded
             Int64 completeSize = response.ContentLength;
-            
+
             if (completeSize == 0)
             {
                 util.log("Requested file size == 0", logPath);
@@ -336,7 +335,7 @@ namespace CSharp_Updater
             try
             {
                 // delete last update file
-                if(File.Exists(downloadName + ".bak"))
+                if (File.Exists(downloadName + ".bak"))
                 {
                     System.IO.File.Delete(downloadName + ".bak");
                 }
@@ -366,94 +365,92 @@ namespace CSharp_Updater
                 // thread safe control modifying
                 this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Verbindung aufbauen");
 
-                // use webclient object to download the file
-                using (System.Net.WebClient webClient = new System.Net.WebClient())
+                try
                 {
-                    // thread safe control modifying
-                    this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Verbindung öffnen");
-
-                    // open file at remote url for reading
-                    using (System.IO.Stream remoteStream = webClient.OpenRead(new Uri(downloadLink)))
+                    // use webclient object to download the file
+                    using (System.Net.WebClient webClient = new System.Net.WebClient())
                     {
                         // thread safe control modifying
-                        this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Lokale Vorbereitung");
+                        this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Verbindung öffnen");
 
-                        // use FileStream to write downloaded files to system
-                        using (System.IO.Stream localStream = new FileStream(downloadName, FileMode.Create, FileAccess.Write, FileShare.None))
+                        // open file at remote url for reading
+                        using (System.IO.Stream remoteStream = webClient.OpenRead(new Uri(downloadLink)))
                         {
                             // thread safe control modifying
-                            this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Download");
+                            this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Lokale Vorbereitung");
 
-                            // loop stream and get file into a file buffer
-                            int byteSize = 0;
-                            byte[] byteBuffer = new byte[completeSize];
-
-                            // create last update time for download speed calculation
-                            DateTime lastUpdateTime = DateTime.Now;
-
-                            // read from remote stream and download into byteBuffer
-                            while ((byteSize = remoteStream.Read(byteBuffer, 0, byteBuffer.Length)) > 0)
+                            // use FileStream to write downloaded files to system
+                            using (System.IO.Stream localStream = new FileStream(downloadName, FileMode.Create, FileAccess.Write, FileShare.None))
                             {
-                                // write to local Stream and file
-                                localStream.Write(byteBuffer, 0, byteSize);
-
-                                // update local byte size
-                                Int64 lastDownloadedSize = downloadedSize;
-                                downloadedSize += byteSize;
-
-                                // calculate progress for progressbar (base 100)
-                                double step = (double)downloadedSize;
-                                double total = (double)byteBuffer.Length;
-                                double fraction = (double)(step / total);
-                                int percentage = (int)(fraction * 100);
-
-                                // calculate download speed
-                                DateTime now = DateTime.Now;
-                                TimeSpan interval = now - lastUpdateTime;
-                                double timeDiff = interval.TotalSeconds;
-                                double sizeDiff = downloadedSize - lastDownloadedSize; // byte
-                                double speed = (double)Math.Floor((double)(sizeDiff * 8) / timeDiff); // bit
-                                // bit / second
-                                if (speed < 0)
-                                {
-                                    speed = 0;
-                                }
-                                string speedString = " Bit/s";
-                                // kilobit / second
-                                if (speed > 999)
-                                {
-                                    speed /= 1000; // kilobit
-                                    speedString = " kBit/s";
-
-                                    // megabit / second
-                                    if (speed > 999)
-                                    {
-                                        speed /= 1000; // megabit
-                                        speedString = " MBit/s";
-
-                                        // gigabit / second
-                                        if (speed > 999) // gigabit
-                                        {
-                                            speed /= 1000;
-                                            speedString = " GBit/s";
-                                        }
-                                    }
-                                }
-                                this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Speed, speed.ToString() + speedString);
-                                lastUpdateTime = now;
-
-                                // update progress bar
                                 // thread safe control modifying
-                                this.Invoke((Func<int, bool>)DoChangeProgress, percentage);
+                                this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Download");
+
+                                // loop stream and get file into a file buffer
+                                int byteSize = 0;
+                                byte[] byteBuffer = new byte[completeSize];
+
+                                // create last update time for download speed calculation
+                                DateTime lastUpdateTime = DateTime.Now;
+                                System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+                                watch.Restart();
+
+                                // read from remote stream and download into byteBuffer
+                                while ((byteSize = remoteStream.Read(byteBuffer, 0, byteBuffer.Length)) > 0)
+                                {
+                                    // write to local Stream and file
+                                    localStream.Write(byteBuffer, 0, byteSize);
+
+                                    // update local byte size
+                                    Int64 lastDownloadedSize = downloadedSize;
+                                    downloadedSize += byteSize;
+
+                                    // calculate progress for progressbar (base 100)
+                                    double step = (double)downloadedSize;
+                                    double total = (double)byteBuffer.Length;
+                                    double fraction = (double)(step / total);
+                                    int percentage = (int)(fraction * 100);
+
+                                    // calculate download speed
+                                    // update speed only all 250 milliseconds
+                                    if (watch.ElapsedMilliseconds >= 250)
+                                    {
+                                        DateTime now = DateTime.Now;
+                                        TimeSpan interval = now - lastUpdateTime;
+                                        double timeDiff = interval.TotalSeconds;
+                                        double sizeDiff = downloadedSize - lastDownloadedSize; // byte
+                                        double speed = (double)Math.Floor((double)(sizeDiff) / timeDiff); // byte
+                                        Speed s = GetSpeed(watch, speed);
+                                        this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Speed, s.speed.ToString() + s.description);
+                                        watch.Restart();
+                                        lastUpdateTime = now;
+                                    }
+
+                                    // update progress bar
+                                    // thread safe control modifying
+                                    this.Invoke((Func<int, bool>)DoChangeProgress, percentage);
+                                }
+
+                                // clean up local stream
+                                localStream.Close();
                             }
 
-                            // clean up local stream
-                            localStream.Close();
+                            // clean up and close remote stream
+                            remoteStream.Close();
                         }
-
-                        // clean up and close remote stream
-                        remoteStream.Close();
                     }
+                }
+                catch (System.Net.WebException ex)
+                {
+                    if (ex.InnerException != null)
+                    {
+                        util.log(ex.InnerException.ToString(), logPath);
+                    }
+                    else
+                    {
+                        util.log(ex.ToString(), logPath);
+                    }
+
+                    return false;
                 }
 
                 // thread safe control modifying
@@ -475,6 +472,49 @@ namespace CSharp_Updater
             }
 
             return true;
+        }
+
+        public struct Speed
+        {
+            public string description { get; set; }
+            public double speed { get; set; }
+        }
+
+        public Speed GetSpeed(System.Diagnostics.Stopwatch watch, double speed)
+        {
+            Speed speedStruct = new Speed { };
+
+            speedStruct.speed = speed * 8;
+
+            // bit / second
+            if (speedStruct.speed < 0)
+            {
+                speedStruct.speed = 0;
+            }
+
+            speedStruct.description = " Bit/s";
+            // kilobit / second
+            if (speedStruct.speed > 999)
+            {
+                speedStruct.speed /= 1000; // kilobit
+                speedStruct.description = " kBit/s";
+
+                // megabit / second
+                if (speedStruct.speed > 999)
+                {
+                    speedStruct.speed /= 1000; // megabit
+                    speedStruct.description = " MBit/s";
+
+                    // gigabit / second
+                    if (speedStruct.speed > 999) // gigabit
+                    {
+                        speedStruct.speed /= 1000;
+                        speedStruct.description = " GBit/s";
+                    }
+                }
+            }
+
+            return speedStruct;
         }
         
         public bool DoChangeLabel(System.Windows.Forms.Label label, string content)
