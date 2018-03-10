@@ -11,4 +11,4 @@ Small Downloader/ Updater. Start with download information parameters and start 
 7. DownloadFolder
 
 # Example
-'.\CSharp Updater.exe' 'CSharp Updater.exe' '1.0.0.0' 'http://ipv4.download.thinkbroadband.com/20MB.zip' 'https://raw.githubusercontent.com/SebastianNetsch/Small-Downloader/master/Update.xml' 'UpdateVersion|UpdateDownloadLink' 'Update for CSharp Updater' '.'
+'.\CSharp Updater.exe' 'CSharp Updater.exe' '1.0.0.0' '' 'https://raw.githubusercontent.com/SebastianNetsch/Small-Downloader/master/Update.xml' 'UpdateVersion|UpdateDownloadLink' 'Update for CSharp Updater' '.'
