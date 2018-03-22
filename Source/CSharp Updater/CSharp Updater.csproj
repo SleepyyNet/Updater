@@ -73,8 +73,11 @@
     <Compile Include="Download.Designer.cs">
       <DependentUpon>Download.cs</DependentUpon>
     </Compile>
+    <Compile Include="DownloadInformation.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility.cs" />
     <EmbeddedResource Include="Download.resx">
       <DependentUpon>Download.cs</DependentUpon>
     </EmbeddedResource>

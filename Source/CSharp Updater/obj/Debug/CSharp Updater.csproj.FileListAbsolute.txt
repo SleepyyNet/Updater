@@ -54,4 +54,3 @@ C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\obj\Debug\CSharp Up
 C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\obj\Debug\CSharp Updater.csproj.CoreCompileInputs.cache
 C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\obj\Debug\CSharp Updater.exe
 C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\obj\Debug\CSharp Updater.pdb
-C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\obj\Debug\CSharp Updater.csprojResolveAssemblyReference.cache
