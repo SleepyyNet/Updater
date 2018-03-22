@@ -15,7 +15,6 @@ namespace CSharp_Updater
     {
         public string[] args = new string[] { };
         public string logPath { set; get; } = ".\\downloader.log";
-        private Utils util = null;
 
         Version oldVersion = null;
         Version newVersion = null;
@@ -24,7 +23,6 @@ namespace CSharp_Updater
         {
             InitializeComponent();
             this.args = args;
-            util = new Utils();
             // wait for rendering to complete and start update check in event function
             this.Shown += new System.EventHandler(this.Download_Shown);
         }
@@ -34,42 +32,20 @@ namespace CSharp_Updater
             DoUpdate(args);
         }
 
-        public class DownloadInformation
-        {
-            // Parameters
-            //   1. ApplicationName with extension
-            //   2. Version // Style "X.X.X.X" == "Major.Minor.Build.Revision"
-            //   3. DownloadLinkUpdate
-            //   4. DownloadLinkUpdateXML
-            //   5. XMLTagNames
-            //      XMLTagNames have to be seperated by "|"
-            //      First TagName = Version (String)
-            //      Second TagName = DownloadLink (String)
-            //   6. Description
-            //   7. DownloadFolder
-            public string applicationName { get; set; }
-            public string version { get; set; }
-            public string downloadLinkUpdate { get; set; }
-            public string downloadLinkUpdateXML { get; set; }
-            public string[] XMLTagNames { get; set; }
-            public string description { get; set; }
-            public string downloadFolder { get; set; }
-        }
-
         public DownloadInformation downloadInformation = new DownloadInformation { };
         
         public async void DoUpdate(object data)
         {
-            this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Version, Application.ProductVersion);
-            this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Content, "");
-            this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Speed, "");
-            this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "");
+            this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Version, Application.ProductVersion, logPath);
+            this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Content, "", logPath);
+            this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Speed, "", logPath);
+            this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Status, "", logPath);
 
             // test and set parameters --> parameters valid after this function! --> use downloadInformation from here on
-            if (FillDownloadInformation(args))
+            if (DownloadInformation.FillDownloadInformation(ref downloadInformation, logPath, ref oldVersion, args))
             {
                 // new Version is set here
-                if (CheckForUpdate())
+                if (DownloadXmlAndCheckForUpdatedInformation())
                 {
                     if (IsNewVersionHigher())
                     {
@@ -112,114 +88,6 @@ namespace CSharp_Updater
             Application.Exit();
         }
 
-        public bool FillDownloadInformation(string[] args)
-        {
-            if (args.Length >= 7)
-            {
-                // set parameters
-                try
-                {
-                    // Set Parameters
-                    //   1. ApplicationName with extension
-                    downloadInformation.applicationName = args[0];
-                    //   2. Version
-                    downloadInformation.version = args[1];
-                    //   3. DownloadLinkUpdate
-                    downloadInformation.downloadLinkUpdate = args[2];
-                    //   4. DownloadLinkUpdateXML
-                    downloadInformation.downloadLinkUpdateXML = args[3];
-                    //   5. DownloadLinkUpdateXMLSchema
-                    downloadInformation.XMLTagNames = args[4].Split('|');
-                    //   6. Description
-                    downloadInformation.description = args[5];
-                    //   7. DownloadFolder
-                    downloadInformation.downloadFolder = args[6];
-                }
-                catch (System.IndexOutOfRangeException ex)
-                {
-                    if (ex.InnerException != null)
-                    {
-                        util.log(ex.InnerException.ToString(), logPath);
-                    }
-                    else
-                    {
-                        util.log(ex.ToString(), logPath);
-                    }
-                    return false;
-                }
-
-                //test parameters
-                //   1. ApplicationName with extension
-                if (downloadInformation.applicationName == "")
-                {
-                    return false;
-                }
-                //   2. Version
-                if (downloadInformation.version == "")
-                {
-                    return false;
-                }
-                else
-                {
-                    try
-                    {
-                        oldVersion = new Version(downloadInformation.version);
-                    }
-                    catch (System.FormatException ex)
-                    {
-                        if(ex.InnerException != null)
-                        {
-                            util.log(ex.InnerException.ToString(), logPath);
-                        }
-                        else
-                        {
-                            util.log(ex.ToString(), logPath);
-                        }
-
-                        return false;
-                    }
-                }
-                //   3. DownloadLinkUpdate
-                if (downloadInformation.downloadLinkUpdate == "")
-                {
-                    return false;
-                }
-                //   4. DownloadLinkUpdateXML
-                if (downloadInformation.downloadLinkUpdateXML == "")
-                {
-                    return false;
-                }
-                //   5. DownloadLinkUpdateXMLSchema
-                if(downloadInformation.XMLTagNames.Length >= 1)
-                {
-                    if (downloadInformation.XMLTagNames[0] == "")
-                    {
-                        return false;
-                    }
-                    if (downloadInformation.XMLTagNames[1] == "")
-                    {
-                        return false;
-                    }
-                }
-                //   6. Description
-                if (downloadInformation.description == "")
-                {
-                    return false;
-                }
-                //   7. DownloadFolder
-                if (downloadInformation.downloadFolder == "")
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
-
-            return true;
-        }
-
         public bool IsNewVersionHigher()
         {
             if(oldVersion.CompareTo(newVersion) < 0)
@@ -234,9 +102,8 @@ namespace CSharp_Updater
             }
         }
 
-        public bool CheckForUpdate()
+        public bool DownloadXmlAndCheckForUpdatedInformation()
         {
-            // ToDo: Download XML
             if (DoDownload("update.xml", downloadInformation.downloadLinkUpdateXML, "Download der Update-Informationen", "."))
             {
                 try
@@ -260,17 +127,10 @@ namespace CSharp_Updater
                         System.IO.File.Delete("update.xml");
                     }
                 }
-                catch (System.FormatException ex)
+                catch (Exception ex)
                 {
-                    if (ex.InnerException != null)
-                    {
-                        util.log(ex.InnerException.ToString(), logPath);
-                    }
-                    else
-                    {
-                        util.log(ex.ToString(), logPath);
-                    }
-                    
+                    Logger.Log(logPath, ex);
+
                     return false;
                 }
             }
@@ -285,10 +145,10 @@ namespace CSharp_Updater
         public bool DoDownload(string applicationName, string downloadLink, string description, string downloadFolder)
         {
             // thread safe control modifying
-            this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Content, description);
+            this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Content, description, logPath);
 
             // thread safe control modifying
-            this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Datei anfordern");
+            this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Status, "Datei anfordern", logPath);
 
             // check file size
             System.Net.HttpWebResponse response = null;
@@ -299,23 +159,17 @@ namespace CSharp_Updater
                 response = (System.Net.HttpWebResponse)request.GetResponse();
                 response.Close();
             }
-            catch (System.Net.WebException ex)
+            catch (Exception ex)
             {
-                if (ex.InnerException != null)
-                {
-                    util.log(ex.InnerException.ToString(), logPath);
-                }
-                else
-                {
-                    util.log(ex.ToString(), logPath);
-                }
+                Logger.Log(logPath, ex);
 
                 return false;
             }
 
             if (response == null)
             {
-                util.log("Invalid response", logPath);
+                Logger.Log(logPath, "Invalid response");
+
                 return false;
             }
 
@@ -324,7 +178,8 @@ namespace CSharp_Updater
             
             if (completeSize == 0)
             {
-                util.log("Requested file size == 0", logPath);
+                Logger.Log(logPath, "Requested file size is zero");
+
                 return false;
             }
 
@@ -347,16 +202,9 @@ namespace CSharp_Updater
                     System.IO.File.Move(downloadName, downloadName + ".bak");
                 }
             }
-            catch (System.IO.IOException ex)
+            catch (Exception ex)
             {
-                if (ex.InnerException != null)
-                {
-                    util.log(ex.InnerException.ToString(), logPath);
-                }
-                else
-                {
-                    util.log(ex.ToString(), logPath);
-                }
+                Logger.Log(logPath, ex);
 
                 return false;
             }
@@ -364,25 +212,25 @@ namespace CSharp_Updater
             try
             {
                 // thread safe control modifying
-                this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Verbindung aufbauen");
+                this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Status, "Verbindung aufbauen", logPath);
 
                 // use webclient object to download the file
                 using (System.Net.WebClient webClient = new System.Net.WebClient())
                 {
                     // thread safe control modifying
-                    this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Verbindung öffnen");
+                    this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Status, "Verbindung öffnen", logPath);
 
                     // open file at remote url for reading
                     using (System.IO.Stream remoteStream = webClient.OpenRead(new Uri(downloadLink)))
                     {
                         // thread safe control modifying
-                        this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Lokale Vorbereitung");
+                        this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Status, "Lokale Vorbereitung", logPath);
 
                         // use FileStream to write downloaded files to system
                         using (System.IO.Stream localStream = new FileStream(downloadName, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
                             // thread safe control modifying
-                            this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Status, "Download");
+                            this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Status, "Download", logPath);
 
                             // loop stream and get file into a file buffer
                             int byteSize = 0;
@@ -411,39 +259,42 @@ namespace CSharp_Updater
                                 DateTime now = DateTime.Now;
                                 TimeSpan interval = now - lastUpdateTime;
                                 double timeDiff = interval.TotalSeconds;
-                                double sizeDiff = downloadedSize - lastDownloadedSize;
-                                if(sizeDiff < 0)
-                                {
-                                    sizeDiff = 0;
-                                }
-                                string speedString = " kb/s";
-                                double speed = (double)Math.Floor((double)(sizeDiff) / timeDiff);
-                                if(speed < 0)
+                                double sizeDiff = downloadedSize - lastDownloadedSize; // byte
+                                double speed = (double)Math.Floor((double)(sizeDiff * 8) / timeDiff); // bit
+                                // bit / second
+                                if (speed < 0)
                                 {
                                     speed = 0;
                                 }
-                                if (speed > 0) // Kilobytes
+                                string speedString = " Bit/s";
+                                // kilobit / second
+                                if (speed > 999)
                                 {
-                                    speed /= 1000;
+                                    speed /= 1000; // kilobit
+                                    speedString = " kBit/s";
 
-                                    if (speed > 999) // Megabytes
+                                    // megabit / second
+                                    if (speed > 999)
                                     {
-                                        speed /= 1000;
-                                        speedString = " mb/s";
+                                        speed /= 1000; // megabit
+                                        speedString = " MBit/s";
 
-                                        if (speed > 999) // Gigabytes
+                                        // gigabit / second
+                                        if (speed > 999) // gigabit
                                         {
                                             speed /= 1000;
-                                            speedString = " gb/s";
+                                            speedString = " GBit/s";
                                         }
                                     }
                                 }
-                                this.Invoke((Func<System.Windows.Forms.Label, string, bool>)DoChangeLabel, label_Speed, speed.ToString() + speedString);
+
+                                // thread safe control modifying
+                                this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Speed, speed.ToString() + speedString, logPath);
                                 lastUpdateTime = now;
 
                                 // update progress bar
                                 // thread safe control modifying
-                                this.Invoke((Func<int, bool>)DoChangeProgress, percentage);
+                                this.Invoke((Func<System.Windows.Forms.ProgressBar, int, string, bool>)Utility.DoChangeProgress, progressBar_DownloadProgess, percentage, logPath);
                             }
 
                             // clean up local stream
@@ -456,193 +307,17 @@ namespace CSharp_Updater
                 }
 
                 // thread safe control modifying
-                //tmpReturn = (bool)this.Invoke((Func<string, bool>)DoChangeStatus, "Download beendet");
+                this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Status, "Download beendet", logPath);
+                this.Invoke((Func<System.Windows.Forms.Label, string, string, bool>)Utility.DoChangeLabel, label_Speed, "", logPath);
             }
-            catch (System.IO.IOException ex)
+            catch (Exception ex)
             {
-                if (ex.InnerException != null)
-                {
-                    util.log(ex.InnerException.ToString(), logPath);
-                }
-                else
-                {
-                    util.log(ex.ToString(), logPath);
-                }
+                Logger.Log(logPath, ex);
 
                 return false;
             }
 
             return true;
-        }
-        
-        public bool DoChangeLabel(System.Windows.Forms.Label label, string content)
-        {
-            try
-            {
-                label.Text = content;
-            }
-            catch (System.InvalidOperationException ex)
-            {
-                if (ex.InnerException != null)
-                {
-                    util.log(ex.InnerException.ToString(), logPath);
-                }
-                else
-                {
-                    util.log(ex.ToString(), logPath);
-                }
-
-                return false;
-            }
-            catch (System.ComponentModel.InvalidAsynchronousStateException ex)
-            {
-                if (ex.InnerException != null)
-                {
-                    util.log(ex.InnerException.ToString(), logPath);
-                }
-                else
-                {
-                    util.log(ex.ToString(), logPath);
-                }
-
-                return false;
-            }
-            catch (System.NullReferenceException ex)
-            {
-                if (ex.InnerException != null)
-                {
-                    util.log(ex.InnerException.ToString(), logPath);
-                }
-                else
-                {
-                    util.log(ex.ToString(), logPath);
-                }
-
-                return false;
-            }
-
-            return true;
-        }
-
-        public bool DoChangeSpeed(string speed)
-        {
-            try
-            {
-                label_Speed.Text = speed;
-            }
-            catch (System.InvalidOperationException ex)
-            {
-                if (ex.InnerException != null)
-                {
-                    util.log(ex.InnerException.ToString(), logPath);
-                }
-                else
-                {
-                    util.log(ex.ToString(), logPath);
-                }
-
-                return false;
-            }
-            catch (System.ComponentModel.InvalidAsynchronousStateException ex)
-            {
-                if (ex.InnerException != null)
-                {
-                    util.log(ex.InnerException.ToString(), logPath);
-                }
-                else
-                {
-                    util.log(ex.ToString(), logPath);
-                }
-
-                return false;
-            }
-            catch (System.NullReferenceException ex)
-            {
-                if (ex.InnerException != null)
-                {
-                    util.log(ex.InnerException.ToString(), logPath);
-                }
-                else
-                {
-                    util.log(ex.ToString(), logPath);
-                }
-
-                return false;
-            }
-
-            return true;
-        }
-
-        public bool DoChangeProgress(int percentage)
-        {
-            try
-            {
-                progressBar_DownloadProgess.Value = percentage;
-            }
-            catch (System.InvalidOperationException ex)
-            {
-                if (ex.InnerException != null)
-                {
-                    util.log(ex.InnerException.ToString(), logPath);
-                }
-                else
-                {
-                    util.log(ex.ToString(), logPath);
-                }
-
-                return false;
-            }
-            catch (System.ComponentModel.InvalidAsynchronousStateException ex)
-            {
-                if (ex.InnerException != null)
-                {
-                    util.log(ex.InnerException.ToString(), logPath);
-                }
-                else
-                {
-                    util.log(ex.ToString(), logPath);
-                }
-
-                return false;
-            }
-            catch (System.NullReferenceException ex)
-            {
-                if (ex.InnerException != null)
-                {
-                    util.log(ex.InnerException.ToString(), logPath);
-                }
-                else
-                {
-                    util.log(ex.ToString(), logPath);
-                }
-
-                return false;
-            }
-
-            return true;
-        }
-    }
-
-    partial class Utils
-    {
-        public Utils()
-        {
-        }
-
-        public void log(string message, string path)
-        {
-            try
-            { 
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(path, true))
-                {
-                    file.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:MM:ss: ") + message);
-                }
-            }
-            catch (System.NullReferenceException)
-            {
-                // yeah..can't log the log error..
-                return;
-            }
         }
     }
 }

@@ -12,3 +12,10 @@ settings.db
 settings.ini
 Browse.VC.*
 .suo
+*.bak
+desktop.ini
+thumbs.db
+*.txt
+*.ide-shm
+*.ide-wal
+*.cache

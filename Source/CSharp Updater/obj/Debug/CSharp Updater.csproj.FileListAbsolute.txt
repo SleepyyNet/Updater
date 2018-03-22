@@ -45,3 +45,13 @@ C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\obj\Debug\CSharp Up
 C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\obj\Debug\CSharp Updater.csproj.CoreCompileInputs.cache
 C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\obj\Debug\CSharp Updater.exe
 C:\Users\USER\Desktop\CSharp Updater_20180127\CSharp Updater\obj\Debug\CSharp Updater.pdb
+C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\bin\Debug\CSharp Updater.exe.config
+C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\bin\Debug\CSharp Updater.exe
+C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\bin\Debug\CSharp Updater.pdb
+C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\obj\Debug\CSharp_Updater.Download.resources
+C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\obj\Debug\CSharp_Updater.Properties.Resources.resources
+C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\obj\Debug\CSharp Updater.csproj.GenerateResource.Cache
+C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\obj\Debug\CSharp Updater.csproj.CoreCompileInputs.cache
+C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\obj\Debug\CSharp Updater.exe
+C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\obj\Debug\CSharp Updater.pdb
+C:\Users\USER\Desktop\Small-Downloader\Source\CSharp Updater\obj\Debug\CSharp Updater.csprojResolveAssemblyReference.cache

@@ -45,9 +45,9 @@
             this.label_Title.AutoSize = true;
             this.label_Title.Location = new System.Drawing.Point(51, 13);
             this.label_Title.Name = "label_Title";
-            this.label_Title.Size = new System.Drawing.Size(115, 13);
+            this.label_Title.Size = new System.Drawing.Size(45, 13);
             this.label_Title.TabIndex = 1;
-            this.label_Title.Text = "Iron Dices Downloader";
+            this.label_Title.Text = "Updater";
             // 
             // pictureBox_Logo
             // 
@@ -86,7 +86,7 @@
             // label_Version
             // 
             this.label_Version.AutoSize = true;
-            this.label_Version.Location = new System.Drawing.Point(164, 13);
+            this.label_Version.Location = new System.Drawing.Point(92, 13);
             this.label_Version.Name = "label_Version";
             this.label_Version.Size = new System.Drawing.Size(70, 13);
             this.label_Version.TabIndex = 7;
