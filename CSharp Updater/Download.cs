@@ -50,12 +50,12 @@ namespace Updater
                 {
                     if (IsNewVersionHigher())
                     {
-                        if (MessageBox.Show("Es ist eine neue Version für " + Path.GetFileNameWithoutExtension(downloadInformation.applicationName) + "(" + newVersion.Major + "." + newVersion.Minor + "." + newVersion.Build + "." + newVersion.Revision + ") verfügbar - Möchten Sie diese Version herunterladen?", "Download verfügbar", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                        if (MessageBox.Show("Es ist eine neue Version für " + Path.GetFileNameWithoutExtension(downloadInformation.applicationName) + " (" + newVersion.Major + "." + newVersion.Minor + "." + newVersion.Build + "." + newVersion.Revision + ") verfügbar - Möchten Sie diese Version herunterladen?", "Download verfügbar", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
                         {
                             // start the task and instantly wait for it..
                             if (await Task.Run(() => DoDownload(downloadInformation.applicationName, downloadInformation.downloadLinkUpdate, downloadInformation.description, downloadInformation.downloadFolder)))
                             {
-                                MessageBox.Show("Die neue Version des Programms " + Path.GetFileNameWithoutExtension(downloadInformation.applicationName) + " (" + newVersion.Major + "." + newVersion.Minor + "." + newVersion.Build + "." + newVersion.Revision + ") wurde heruntergeladen.", "Download verarbeitet", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                MessageBox.Show("Die neue Version des Programms " + Path.GetFileNameWithoutExtension(downloadInformation.applicationName) + " (" + newVersion.Major + "." + newVersion.Minor + "." + newVersion.Build + "." + newVersion.Revision + ") wurde heruntergeladen. Bitte starten Sie " + Path.GetFileNameWithoutExtension(downloadInformation.applicationName) + " neu.", "Download verarbeitet", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             }
                             else
                             {
@@ -77,7 +77,7 @@ namespace Updater
                 }
                 else
                 {
-                    // new version is not higher than current
+                    // xml error
                     MessageBox.Show("Es ist konnten keine Updateinformationen heruntergeladen werden!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }

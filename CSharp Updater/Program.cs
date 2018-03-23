@@ -128,7 +128,7 @@ namespace Updater
             }
             if (version >= 378675)
             {
-                return "4.5.1+";
+                return "4.5.1";
             }
             if (version >= 378389)
             {
