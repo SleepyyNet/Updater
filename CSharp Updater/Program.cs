@@ -28,13 +28,13 @@ namespace Updater
                 {
                     // specific error occured
                     MessageBox.Show("Das Update wurde aufgrund eines TargetInvocationException Fehlers (" + ex.ToString() + ") abgebrochen!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    Application.Exit();
+                    Environment.Exit(1);
                 }
                 catch (Exception ex)
                 {
                     // error occured
                     MessageBox.Show("Das Update wurde aufgrund eines unbekannten Fehlers (" + ex.ToString() + ") abgebrochen!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    Application.Exit();
+                    Environment.Exit(1);
                 }
             }
             else
@@ -46,7 +46,7 @@ namespace Updater
                     Process.Start("https://www.microsoft.com/de-de/download/confirmation.aspx?id=40779");
                 }
 
-                Application.Exit();
+                Environment.Exit(1);
             }
         }
 
