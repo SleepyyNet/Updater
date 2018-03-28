@@ -50,46 +50,67 @@ namespace Updater
                 {
                     if (IsNewVersionHigher())
                     {
-                        if (MessageBox.Show("Es ist eine neue Version für " + Path.GetFileNameWithoutExtension(downloadInformation.applicationName) + " (" + newVersion.Major + "." + newVersion.Minor + "." + newVersion.Build + "." + newVersion.Revision + ") verfügbar - Möchten Sie diese Version herunterladen?", "Download verfügbar", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                        if (MessageBox.Show("Es ist eine neue Version für " + Path.GetFileNameWithoutExtension(downloadInformation.applicationName) + " (" + newVersion.Major + "." + newVersion.Minor + "." + newVersion.Build + "." + newVersion.Revision + ") verfügbar - Möchten Sie diese Version herunterladen und installieren?", "Download verfügbar", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
                         {
                             // start the task and instantly wait for it..
                             if (await Task.Run(() => DoDownload(downloadInformation.applicationName, downloadInformation.downloadLinkUpdate, downloadInformation.description, downloadInformation.downloadFolder)))
                             {
                                 MessageBox.Show("Die neue Version des Programms " + Path.GetFileNameWithoutExtension(downloadInformation.applicationName) + " (" + newVersion.Major + "." + newVersion.Minor + "." + newVersion.Build + "." + newVersion.Revision + ") wurde heruntergeladen. Bitte starten Sie " + Path.GetFileNameWithoutExtension(downloadInformation.applicationName) + " neu.", "Download verarbeitet", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                                 Environment.Exit(0);
                             }
                             else
                             {
                                 // update had an error
-                                MessageBox.Show("Das Update wird aufgrund eines Fehlers abgebrochen!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                if (!Configuration.isSilent)
+                                {
+                                    MessageBox.Show("Das Update wird aufgrund eines Fehlers abgebrochen!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+
                                 Environment.Exit(1);
                             }
                         }
                         else
                         {
                             // update was denied
-                            MessageBox.Show("Das Update wurde abgelehnt!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            if (!Configuration.isSilent)
+                            {
+                                MessageBox.Show("Das Update wurde abgelehnt!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+
                             Environment.Exit(1);
                         }
                     }
                     else
                     {
                         // new version is not higher than current
-                        MessageBox.Show("Es ist kein Update verfügbar!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        if (!Configuration.isSilent)
+                        {
+                            MessageBox.Show("Es ist kein Update verfügbar!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+
                         Environment.Exit(1);
                     }
                 }
                 else
                 {
                     // xml error
-                    MessageBox.Show("Es ist konnten keine Updateinformationen heruntergeladen werden!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    if (!Configuration.isSilent)
+                    {
+                        MessageBox.Show("Es ist konnten keine Updateinformationen heruntergeladen werden!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+
                     Environment.Exit(1);
                 }
             }
             else
             {
                 // not all parameters valid
-                MessageBox.Show("Das Update wird aufgrund fehlerhafter Informationen abgebrochen!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                if (!Configuration.isSilent)
+                {
+                    MessageBox.Show("Das Update wird aufgrund fehlerhafter Informationen abgebrochen!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
                 Environment.Exit(1);
             }
         }
