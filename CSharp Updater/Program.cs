@@ -13,8 +13,7 @@ namespace Updater
         [STAThread]
         static void Main(string[] args)
         {
-            // check for isSilent flag args[7] -s | --silent
-            CheckSilentMode(args);
+            Configuration.FillConfiguration(args);
 
             // check for needed .NET Framework
             if(IsNet45OrNewer())
@@ -104,7 +103,7 @@ namespace Updater
             }
             catch (Exception ex)
             {
-                Logger.Log(Download.logPath, ex);
+                Logger.Log(ex);
 
                 return false;
             }
@@ -151,14 +150,6 @@ namespace Updater
 
             // default
             return "";
-        }
-
-        public static void CheckSilentMode(string[] args)
-        {
-            if ((Array.Exists<string>(args, element => element == "-s")) || (Array.Exists<string>(args, element => element == "--silent")))
-            {
-                Configuration.isSilent = true;
-            }
         }
     }
 }
