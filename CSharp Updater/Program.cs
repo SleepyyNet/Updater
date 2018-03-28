@@ -13,6 +13,8 @@ namespace Updater
         [STAThread]
         static void Main(string[] args)
         {
+            Configuration.FillConfiguration(args);
+
             // check for needed .NET Framework
             if(IsNet45OrNewer())
             {
@@ -27,26 +29,37 @@ namespace Updater
                 catch (System.Reflection.TargetInvocationException ex)
                 {
                     // specific error occured
-                    MessageBox.Show("Das Update wurde aufgrund eines TargetInvocationException Fehlers (" + ex.ToString() + ") abgebrochen!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    Application.Exit();
+                    if (!Configuration.isSilent)
+                    {
+                        MessageBox.Show("Das Update wurde aufgrund eines TargetInvocationException Fehlers (" + ex.ToString() + ") abgebrochen!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+
+                    Environment.Exit(1);
                 }
                 catch (Exception ex)
                 {
                     // error occured
-                    MessageBox.Show("Das Update wurde aufgrund eines unbekannten Fehlers (" + ex.ToString() + ") abgebrochen!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    Application.Exit();
+                    if (!Configuration.isSilent)
+                    {
+                        MessageBox.Show("Das Update wurde aufgrund eines unbekannten Fehlers (" + ex.ToString() + ") abgebrochen!", "Update abgebrochen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+
+                    Environment.Exit(1);
                 }
             }
             else
             {
                 // .NET version too old, download new one?
-                if(MessageBox.Show("Sie benötigen mindestens die .NET Version 4.5.1 - Möchten Sie diese Version herunterladen?", ".NET Version veraltet", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+                if (!Configuration.isSilent)
                 {
-                    // start browser for downloading
-                    Process.Start("https://www.microsoft.com/de-de/download/confirmation.aspx?id=40779");
+                    if (MessageBox.Show("Sie benötigen mindestens die .NET Version 4.5.1 - Möchten Sie diese Version herunterladen?", ".NET Version veraltet", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+                    {
+                        // start browser for downloading
+                        Process.Start("https://www.microsoft.com/de-de/download/confirmation.aspx?id=40779");
+                    }
                 }
 
-                Application.Exit();
+                Environment.Exit(1);
             }
         }
 
@@ -90,7 +103,7 @@ namespace Updater
             }
             catch (Exception ex)
             {
-                Logger.Log(Download.logPath, ex);
+                Logger.Log(ex);
 
                 return false;
             }
@@ -128,7 +141,7 @@ namespace Updater
             }
             if (version >= 378675)
             {
-                return "4.5.1+";
+                return "4.5.1";
             }
             if (version >= 378389)
             {

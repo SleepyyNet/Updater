@@ -12,11 +12,11 @@ namespace Updater
 {
     class Logger
     {
-        public static void Log(string pathToLogFile, string message, [CallerMemberName]string callerMember = "")
+        public static void Log(string message, [CallerMemberName]string callerMember = "")
         {
             try
             {
-                using (StreamWriter file = new StreamWriter(pathToLogFile, true))
+                using (StreamWriter file = new StreamWriter(Configuration.logPath, true))
                 {
                     /* get caller class and method name */
                     StackFrame frame = new StackFrame(1);
@@ -32,11 +32,11 @@ namespace Updater
             }
         }
 
-        public static void Log(string pathToLogFile, Exception ex, [CallerMemberName]string callerMember = "")
+        public static void Log(Exception ex, [CallerMemberName]string callerMember = "")
         {
             try
             {
-                using (StreamWriter file = new StreamWriter(pathToLogFile, true))
+                using (StreamWriter file = new StreamWriter(Configuration.logPath, true))
                 {
                     /* get caller class and method name */
                     StackFrame frame = new StackFrame(1);
