@@ -6,139 +6,240 @@ using System.Threading.Tasks;
 
 namespace Updater
 {
-    public class DownloadInformation
+    public static class DownloadInformation
     {
         // Parameters
-        //   1. ApplicationName with extension
-        //   2. Version // Style "X.X.X.X" == "Major.Minor.Build.Revision"
-        //   3. DownloadLinkUpdate
-        //   4. DownloadLinkUpdateXML
-        //   5. XMLTagNames
-        //      XMLTagNames have to be seperated by "|"
-        //      First TagName = Version (String)
-        //      Second TagName = DownloadLink (String)
-        //   6. Description
-        //   7. DownloadFolder
-        public string applicationName { get; set; }
-        public string version { get; set; }
-        public string downloadLinkUpdate { get; set; }
-        public string downloadLinkUpdateXML { get; set; }
-        public string[] XMLTagNames { get; set; }
-        public string description { get; set; }
-        public string downloadFolder { get; set; }
+        //   -a | --appname     ApplicationName with extension
+        //   -v | --version     Version // Style "X.X.X.X" == "Major.Minor.Build.Revision"
+        //   -d | --directlink  Direct download link
+        //   -dx | --xmllink    Xml download link
+        //   -tx | --xmltags    Xml tag names
+        //   -xf | --xmlfirst   First TagName = Version (String) requires -tx
+        //   -xs | --xmlsecond  Second TagName = DownloadLink (String) requires -tx
+        //   -c | --comment     Description
+        //   -f | --folder      DownloadFolder
+        public static string applicationName { get; set; } = string.Empty;
+        public static string oldVersion { get; set; } = string.Empty;
+        public static string directLink { get; set; } = string.Empty;
+        public static string xmlLink { get; set; } = string.Empty;
+        public static string[] xmlTagNames { get; set; } = new string[2];
+        public static string comment { get; set; } = string.Empty;
+        public static string downloadFolder { get; set; } = string.Empty;
+        public static string newVersion { get; set; } = string.Empty; // not read here, but read from Xml
 
-        public static bool FillDownloadInformation(ref DownloadInformation download, string logPath, ref Version oldVersion, string[] args)
+        public static bool FillDownloadInformation(string[] args)
         {
-            if (args.Length >= 7)
+            try
             {
-                // set parameters
-                try
-                {
-                    // Set Parameters
-                    //   1. ApplicationName with extension
-                    download.applicationName = args[0];
-                    //   2. Version
-                    download.version = args[1];
-                    //   3. DownloadLinkUpdate
-                    download.downloadLinkUpdate = args[2];
-                    //   4. DownloadLinkUpdateXML
-                    download.downloadLinkUpdateXML = args[3];
-                    //   5. DownloadLinkUpdateXMLSchema
-                    download.XMLTagNames = args[4].Split('|');
-                    //   6. Description
-                    download.description = args[5];
-                    //   7. DownloadFolder
-                    download.downloadFolder = args[6];
-                }
-                catch (Exception ex)
-                {
-                    Logger.Log(logPath, ex);
-
-                    return false;
-                }
-
-                //test parameters
-                //   1. ApplicationName with extension
-                if (download.applicationName == "")
-                {
-                    Logger.Log(logPath, "Application name was empty");
-
-                    return false;
-                }
-                //   2. Version
-                if (download.version == "")
-                {
-                    Logger.Log(logPath, "Application version was empty");
-
-                    return false;
-                }
-                else
-                {
-                    try
-                    {
-                        // set class wide oldVersion
-                        oldVersion = new Version(download.version);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Log(logPath, ex);
-
-                        return false;
-                    }
-                }
-                //   3. DownloadLinkUpdate
-                if (download.downloadLinkUpdate == "")
-                {
-                    Logger.Log(logPath, "Application download link was empty");
-
-                    return false;
-                }
-                //   4. DownloadLinkUpdateXML
-                if (download.downloadLinkUpdateXML == "")
-                {
-                    Logger.Log(logPath, "Application xml download link was empty");
-
-                    return false;
-                }
-                //   5. DownloadLinkUpdateXMLSchema
-                if (download.XMLTagNames.Length >= 1)
-                {
-                    if (download.XMLTagNames[0] == "")
-                    {
-                        Logger.Log(logPath, "Application xml tag name one was empty");
-
-                        return false;
-                    }
-                    if (download.XMLTagNames[1] == "")
-                    {
-                        Logger.Log(logPath, "Application xml tag name two was empty");
-
-                        return false;
-                    }
-                }
-                //   6. Description
-                if (download.description == "")
-                {
-                    Logger.Log(logPath, "Application description was empty");
-
-                    return false;
-                }
-                //   7. DownloadFolder
-                if (download.downloadFolder == "")
-                {
-                    Logger.Log(logPath, "Application download folder was empty");
-
-                    return false;
-                }
+                if (!CheckApplicationName(args)) { return false; }
+                if (!CheckVersion(args)) { return false; }
+                CheckDirectLink(args);
+                if (!CheckXmlLink(args)) { return false; }
+                if (!CheckXmlParameters(args)) { return false; } // fills xmltags
+                if (!CheckComment(args)) { return false; }
+                if (!CheckDownloadFolder(args)) { return false; }
             }
-            else
+            catch (Exception ex)
             {
-                Logger.Log(logPath, "Application parameters were invalid ( "+ args.Length + " )");
+                Logger.Log(ex);
 
                 return false;
             }
 
             return true;
+        }
+
+        private static bool CheckApplicationName(string[] args)
+        {
+            string val = string.Empty;
+
+            Utility.CheckArrayForStringAndApplyNext(args, ref val, "-a");
+            if (val == string.Empty) // no short version, check for long one
+            {
+                Utility.CheckArrayForStringAndApplyNext(args, ref val, "--appname");
+            }
+
+            if (val != string.Empty)
+            {
+                DownloadInformation.applicationName = val;
+
+                return true;
+            }
+
+            Logger.Log("Application name was empty");
+
+            return false;
+        }
+
+        private static bool CheckVersion(string[] args)
+        {
+            string val = string.Empty;
+
+            Utility.CheckArrayForStringAndApplyNext(args, ref val, "-v");
+            if (val == string.Empty) // no short version, check for long one
+            {
+                Utility.CheckArrayForStringAndApplyNext(args, ref val, "--oldVersion");
+            }
+
+            if (val != string.Empty)
+            {
+                DownloadInformation.oldVersion = val;
+
+                return true;
+            }
+
+            Logger.Log("Application version was empty");
+
+            return false;
+        }
+
+        // can be empty
+        private static void CheckDirectLink(string[] args)
+        {
+            string val = string.Empty;
+
+            Utility.CheckArrayForStringAndApplyNext(args, ref val, "-d");
+            if (val == string.Empty) // no short version, check for long one
+            {
+                Utility.CheckArrayForStringAndApplyNext(args, ref val, "--directlink");
+            }
+
+            if (val != string.Empty)
+            {
+                DownloadInformation.directLink = val;
+            }
+        }
+
+        private static bool CheckXmlLink(string[] args)
+        {
+            string val = string.Empty;
+
+            Utility.CheckArrayForStringAndApplyNext(args, ref val, "-dx");
+            if (val == string.Empty) // no short version, check for long one
+            {
+                Utility.CheckArrayForStringAndApplyNext(args, ref val, "--xmllink");
+            }
+
+            if (val != string.Empty)
+            {
+                DownloadInformation.xmlLink = val;
+
+                return true;
+            }
+
+            Logger.Log("Application xml download link was empty");
+
+            return false;
+        }
+
+        private static bool CheckXmlParameters(string[] args)
+        {
+            string val = string.Empty;
+
+            Utility.CheckArrayForStringAndApplyNext(args, ref val, "-tx");
+            if (val == string.Empty) // no short version, check for long one
+            {
+                Utility.CheckArrayForStringAndApplyNext(args, ref val, "--xmltags");
+            }
+
+            if (val != string.Empty)
+            {
+                string[] pattern = new string[2];
+
+                pattern[0] = "-xf";
+                pattern[1] = "-xmlfirst";
+                if (!CheckXmlTagNamesParameter(args, 0, pattern))
+                {
+                    Logger.Log("Application xml tag 1 was empty");
+
+                    return false;
+                }
+
+                pattern[0] = "-xs";
+                pattern[1] = "-xmlsecond";
+                if (!CheckXmlTagNamesParameter(args, 1, pattern))
+                {
+                    Logger.Log("Application xml tag 2 was empty");
+
+                    return false;
+                }
+
+                return true;
+            }
+            
+            return true;
+        }
+
+        private static bool CheckXmlTagNamesParameter(string[] args, int index, string[] pattern)
+        {
+            string val = string.Empty;
+            
+            if (pattern.Length == 2)
+            {
+                if ((pattern[0] != string.Empty) && (pattern[1] != string.Empty))
+                {
+                    Utility.CheckArrayForStringAndApplyNext(args, ref val, pattern[0]);
+                    if (val == string.Empty) // no short version, check for long one
+                    {
+                        Utility.CheckArrayForStringAndApplyNext(args, ref val, pattern[1]);
+                    }
+
+                    if (val != string.Empty)
+                    {
+                        DownloadInformation.xmlTagNames[index] = val;
+
+                        return true;
+                    }
+                }
+            }
+
+            Logger.Log("Application xml tag name parameter was empty");
+            
+            return false;
+        }
+
+        private static bool CheckComment(string[] args)
+        {
+            string val = string.Empty;
+
+            Utility.CheckArrayForStringAndApplyNext(args, ref val, "-c");
+            if (val == string.Empty) // no short version, check for long one
+            {
+                Utility.CheckArrayForStringAndApplyNext(args, ref val, "--comment");
+            }
+
+            if (val != string.Empty)
+            {
+                DownloadInformation.comment = val;
+
+                return true;
+            }
+
+            Logger.Log("Application comment was empty");
+
+            return false;
+        }
+
+        private static bool CheckDownloadFolder(string[] args)
+        {
+            string val = string.Empty;
+
+            Utility.CheckArrayForStringAndApplyNext(args, ref val, "-f");
+            if (val == string.Empty) // no short version, check for long one
+            {
+                Utility.CheckArrayForStringAndApplyNext(args, ref val, "--folder");
+            }
+
+            if (val != string.Empty)
+            {
+                DownloadInformation.downloadFolder = val;
+
+                return true;
+            }
+
+            Logger.Log("Application download folder was empty");
+
+            return false;
         }
     }
 }
