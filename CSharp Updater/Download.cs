@@ -248,15 +248,15 @@ namespace Updater
             try
             {
                 // delete last update file
-                if(File.Exists(downloadName + ".bak"))
+                if(File.Exists(downloadName + ".old"))
                 {
-                    System.IO.File.Delete(downloadName + ".bak");
+                    System.IO.File.Delete(downloadName + ".old");
                 }
 
                 // move now running exe to backup file (to be deleted at the next update)
                 if (File.Exists(downloadName))
                 {
-                    System.IO.File.Move(downloadName, downloadName + ".bak");
+                    System.IO.File.Move(downloadName, downloadName + ".old");
                 }
             }
             catch (Exception ex)
